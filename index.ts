@@ -16,3 +16,6 @@ export type {
   TurnResult,
   UserInput,
 } from './src/types';
+
+export { createCodexClient } from './src/client';
+export type { CodexProcess } from './src/client';

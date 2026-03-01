@@ -2,15 +2,12 @@
  * JSON-RPC 2.0 protocol utilities for Codex app-server communication.
  */
 
-let nextId = 0;
-
 export function rpcRequest(
+  id: number,
   method: string,
   params: Record<string, unknown> = {},
-): { id: number; payload: string } {
-  const id = ++nextId;
-  const payload = JSON.stringify({ jsonrpc: '2.0', id, method, params });
-  return { id, payload };
+): string {
+  return JSON.stringify({ jsonrpc: '2.0', id, method, params });
 }
 
 export function rpcNotification(

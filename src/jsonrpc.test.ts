@@ -7,61 +7,69 @@ import {
 } from './jsonrpc';
 
 describe('rpcRequest', () => {
-  test('generates valid JSON-RPC request', () => {
-    const { id, payload } = rpcRequest('test/method', { key: 'value' });
-    const parsed = JSON.parse(payload);
-
-    expect(parsed['jsonrpc']).toBe('2.0');
-    expect(parsed['id']).toBe(id);
-    expect(parsed['method']).toBe('test/method');
-    expect(parsed['params']).toEqual({ key: 'value' });
+  test('generates valid JSON-RPC request with given id', () => {
+    expect(JSON.parse(rpcRequest(1, 'test/method', { key: 'value' }))).toEqual({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'test/method',
+      params: { key: 'value' },
+    });
   });
 
-  test('increments id on each call', () => {
-    const first = rpcRequest('a');
-    const second = rpcRequest('b');
-    expect(second.id).toBe(first.id + 1);
+  test('uses the provided id', () => {
+    expect(JSON.parse(rpcRequest(99, 'a'))).toEqual({
+      jsonrpc: '2.0',
+      id: 99,
+      method: 'a',
+      params: {},
+    });
   });
 
   test('defaults params to empty object', () => {
-    const { payload } = rpcRequest('no-params');
-    const parsed = JSON.parse(payload);
-    expect(parsed['params']).toEqual({});
+    expect(JSON.parse(rpcRequest(1, 'no-params'))).toEqual({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'no-params',
+      params: {},
+    });
   });
 });
 
 describe('rpcNotification', () => {
   test('generates notification without id', () => {
-    const payload = rpcNotification('notify/method', { foo: 'bar' });
-    const parsed = JSON.parse(payload);
-
-    expect(parsed['jsonrpc']).toBe('2.0');
-    expect(parsed['method']).toBe('notify/method');
-    expect(parsed['params']).toEqual({ foo: 'bar' });
-    expect('id' in parsed).toBe(false);
+    expect(
+      JSON.parse(rpcNotification('notify/method', { foo: 'bar' })),
+    ).toEqual({
+      jsonrpc: '2.0',
+      method: 'notify/method',
+      params: { foo: 'bar' },
+    });
   });
 
   test('defaults params to empty object', () => {
-    const payload = rpcNotification('notify');
-    const parsed = JSON.parse(payload);
-    expect(parsed['params']).toEqual({});
+    expect(JSON.parse(rpcNotification('notify'))).toEqual({
+      jsonrpc: '2.0',
+      method: 'notify',
+      params: {},
+    });
   });
 });
 
 describe('rpcResponse', () => {
   test('generates valid JSON-RPC response', () => {
-    const payload = rpcResponse(42, { status: 'ok' });
-    const parsed = JSON.parse(payload);
-
-    expect(parsed['jsonrpc']).toBe('2.0');
-    expect(parsed['id']).toBe(42);
-    expect(parsed['result']).toEqual({ status: 'ok' });
+    expect(JSON.parse(rpcResponse(42, { status: 'ok' }))).toEqual({
+      jsonrpc: '2.0',
+      id: 42,
+      result: { status: 'ok' },
+    });
   });
 
   test('handles null result', () => {
-    const payload = rpcResponse(1, null);
-    const parsed = JSON.parse(payload);
-    expect(parsed['result']).toBeNull();
+    expect(JSON.parse(rpcResponse(1, null))).toEqual({
+      jsonrpc: '2.0',
+      id: 1,
+      result: null,
+    });
   });
 });
 
